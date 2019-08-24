@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>IIIF Collection Search</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script type="text/javascript" src="itemsjs.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/vue/latest/vue.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/vuejs-paginate@latest"></script>
+
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+  <!-- Bootstrap core CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.8/css/mdb.min.css" rel="stylesheet">
+
+
+  <!-- TODO: Missing CoffeeScript 2 -->
+
+  <script type="text/javascript">//<![CDATA[
+
+    var url = getParam('u') ? getParam('u') : "https://api.myjson.com/bins/ba7sr";
+
+    window.onload = function () {
+
+      var req = new XMLHttpRequest();						// XMLHttpRequest オブジェクトを生成する
+      req.onreadystatechange = function () {				// XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
+        if (req.readyState == 4 && req.status == 200) {	// サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
+
+          var data = JSON.parse(req.responseText);	// 取得した JSON ファイルの中身を変数へ格納
+          main(data)
+
+        }
+      };
+      req.open("GET", url, false);				// HTTPメソッドとアクセスするサーバーのURLを指定
+      req.send(null);
+    }
+
+    function main(data) {
+      var configuration = data.config
+
+      var rows = data.rows
+
+      // the rows comes from external resources
+      // https://github.com/itemsapi/itemsapi-example-data/blob/master/jsfiddle/imdb.js
+      itemsjs = itemsjs(rows, configuration);
+
+      // add vue component for pagination
+      Vue.component('paginate', VuejsPaginate)
+
+      var vm = new Vue({
+        el: '#el',
+        data: function () {
+
+          // making it more generic
+          var filters = {};
+          Object.keys(configuration.aggregations).map(function (v) {
+            filters[v] = [];
+          })
+
+          // adding pagination variables
+          var page = this.page || 1;
+          var per_page = this.per_page || 12;
+
+          return {
+            query: '',
+            // initializing filters with empty arrays
+            filters: filters,
+            page: page,
+            per_page: per_page,
+          }
+        },
+        methods: {
+          reset: function () {
+            var filters = {};
+            Object.keys(configuration.aggregations).map(function (v) {
+              filters[v] = [];
+            })
+
+            this.filters = filters;
+            this.page = 1;
+            this.query = '';
+          },
+          goToPage: function (page) {
+            this.page = page;
+            return page;
+          },
+        },
+        watch: {
+          query: function () {
+            this.page = 1;
+          }
+        },
+        computed: {
+          searchResult: function () {
+
+            var result = itemsjs.search({
+              query: this.query,
+              page: this.page,
+              per_page: 12,
+              filters: this.filters
+            })
+
+            return result
+          }
+        }
+      });
+    }
+
+    /**
+   * Get the URL parameter value
+   *
+   * @param  name {string} パラメータのキー文字列
+   * @return  url {url} 対象のURL文字列（任意）
+   */
+    function getParam(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+  //]]></script>
+
+</head>
+
+<body>
+  <div id="el">
+
+    <!--Navbar-->
+    <nav class="navbar navbar-expand-lg fixed-top navbar-dark unique-color-dark">
+
+      <div class="container">
+
+        <!-- Navbar brand -->
+        <span class="navbar-brand white-text mr-4">IIIF Collection Search</span>
+
+        <div style="width: 100%">
+          <input type="text" v-model="query" class="form-control" placeholder="Search">
+        </div>
+
+      </div>
+
+    </nav>
+    <!--/.Navbar-->
+
+    <div class="py-5" style="margin-top: 50px; background-color: #eee">
+
+      <div class="container">
+
+
+        <div class="row">
+
+          
+
+          <div class="col-md-9 order-md-2 order-sm-1 mb-4">
+
+            <!-- Card Light -->
+            <div class="card">
+
+              <!-- Card content -->
+              <div class="card-body">
+
+                <div class="row mb-4">
+
+                  <div class="col-md-12">
+                    {{ searchResult.pagination.total }} results found <small class="text-muted">performed in
+                      {{ searchResult.timings.search }} ms, facets in
+                      {{ searchResult.timings.facets }} ms</small>
+                  </div>
+                  <!-- 
+              <div class="col-md-6 text-right">
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                  <label class="btn btn-primary active btn-sm">
+                    <input type="radio" name="options" id="option1" autocomplete="off" checked> Active
+                  </label>
+                  <label class="btn btn-primary btn-sm">
+                    <input type="radio" name="options" id="option2" autocomplete="off"> Radio
+                  </label>
+                  </div>
+              </div>
+              -->
+
+                </div>
+
+                <template v-for="item of searchResult.data.items">
+
+                  
+
+                  <div class="row">
+                    <div class="col-md-3 mb-2">
+                      <img class="img-responsive img-thumbnail" v-bind:src="item.thumbnail">
+                    </div>
+                    <div class="col-md-9">
+
+                      <h5><b><a :href="item.related" target="related">{{ item.label }}</a></b><a class="ml-2" target="manifest"
+                          :href="item.manifest"><img style="width: 30px" src="https://jpsearch.go.jp/assets/img/icon/iiif-logo.svg" /></a>
+                      </h5>
+                      <p>
+                        {{ item.description }}
+                      </p>
+                      <p>
+                        <template v-for="(array, field) in item" v-if="Array.isArray(array)">
+                          <small
+                            style="display: block; float: left; background-color: #dbebf2; border-radius: 5px; padding: 1px 3px 1px 3px; margin: 2px;"
+                            v-for="tag in array">{{ field }}: {{ tag }}</small>
+                        </template>
+                      </p>
+
+                    </div>
+                  </div>
+
+                  <hr />
+                  
+                </template>
+
+                <!-- div for pagination block -->
+                <div>
+                  <paginate style="justify-content: center;"
+                    :page-count="Math.ceil(searchResult.pagination.total / searchResult.pagination.per_page)"
+                    :click-handler="goToPage" :prev-text="'Prev'" :next-text="'Next'" :container-class="'pagination'"
+                    :page-class="'page-item'" :page-link-class="'page-link'" :prev-class="'page-item'"
+                    :prev-link-class="'page-link'" :next-class="'page-item'" :next-link-class="'page-link'">
+                  </paginate>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        
+
+        <div class="col-md-3 order-md-1 order-sm-2">
+        
+          <!-- Card Light -->
+          <div class="card">
+        
+            <!-- Card content -->
+            <div class="card-body">
+              <div class="mb-4" v-for="facet in searchResult.data.aggregations">
+                <h5><strong>{{ facet.title }}</strong></h5>
+        
+                <ul class="browse-list list-unstyled long-list" style="margin-bottom: 0;">
+                  <li v-for="bucket in facet.buckets">
+                    <div class="checkbox block">
+                      <label>
+                        <input class="checkbox" type="checkbox" v-model="filters[facet.name]" v-bind:value="bucket.key">
+                        {{ bucket.key }} <small class="text-muted">({{ bucket.doc_count }})</small>
+                      </label>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        
+        </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="page-footer unique-color-dark">
+
+    <!--Copyright-->
+    <div class="footer-copyright text-center">
+      <div class="containter-fluid my-5">
+        Minimal Archive Project
+      </div>
+    </div>
+    <!--/.Copyright-->
+  </footer>
+</body>
+
+</html>
