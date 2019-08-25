@@ -3,7 +3,7 @@
 
 <head>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <title>IIIF Collection Search</title>
+  <title>{{label}}</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="robots" content="noindex, nofollow">
   <meta name="googlebot" content="noindex, nofollow">
@@ -65,6 +65,8 @@
             filters[v] = [];
           })
 
+          label = configuration.label ? configuration.label : "IIIF Collection Search";
+
           // adding pagination variables
           var page = this.page || 1;
           var per_page = this.per_page || 12;
@@ -75,6 +77,7 @@
             filters: filters,
             page: page,
             per_page: per_page,
+            label: label
           }
         },
         methods: {
@@ -143,7 +146,7 @@
       <div class="container">
 
         <!-- Navbar brand -->
-        <span class="navbar-brand white-text mr-4">IIIF Collection Search</span>
+        <span class="navbar-brand white-text mr-4">{{label}}</span>
 
         <div style="width: 100%">
           <input type="text" v-model="query" class="form-control" placeholder="Search">
@@ -278,7 +281,7 @@
     <!--Copyright-->
     <div class="footer-copyright text-center">
       <div class="containter-fluid my-5">
-        Minimal Archive Project
+        IIIF Collection Search developed by Minimal Archive Project.
       </div>
     </div>
     <!--/.Copyright-->
