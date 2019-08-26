@@ -70,10 +70,11 @@
           // adding pagination variables
           var page = this.page || 1;
           var per_page = this.per_page || 12;
-          var sort = this.sort || 'label_asc';
+          var sort = this.sort || "_score_desc";
           var grid = this.grid || true;
 
           return {
+            sortings: configuration.sortings,
             query: '',
             // initializing filters with empty arrays
             sort: sort,
@@ -119,8 +120,6 @@
               filters: this.filters,
               grid: this.grid
             })
-
-            //console.log(result)
 
             return result
           }
@@ -197,7 +196,7 @@
 
 
                     <div class="form-inline float-sm-right">
-                      <div class="btn-group btn-group-toggle" data-toggle="buttons" @click="active">
+                      <div class="btn-group btn-group-toggle mx-1 py-1" data-toggle="buttons" @click="active">
                         <label class="btn btn-primary btn-sm" v-bind:class='{active:grid}'>
                           <i class="fas fa-th-large"></i>
                         </label>
@@ -205,13 +204,13 @@
                           <i class="fas fa-th-list"></i>
                         </label>
                       </div>
-                      <!-- 
-                      <div class="form-group ml-3">
-                        <select class="form-control">
-                          <option>aaa</option>
+
+                      <div class="form-group mx-1 py-1">
+                        <select v-model="sort" class="form-control">
+                          <option value="_score_desc">Relevance</option>
+                          <option v-for="(value, key) in sortings" :value="key">{{key}}</option>
                         </select>
                       </div>
-                      -->
                     </div>
 
 
