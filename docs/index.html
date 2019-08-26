@@ -70,14 +70,18 @@
           // adding pagination variables
           var page = this.page || 1;
           var per_page = this.per_page || 12;
+          var sort = this.sort || 'label_asc';
+          var grid = this.grid || true;
 
           return {
             query: '',
             // initializing filters with empty arrays
+            sort: sort,
             filters: filters,
             page: page,
             per_page: per_page,
-            label: label
+            label: label,
+            grid: grid
           }
         },
         methods: {
@@ -95,6 +99,9 @@
             this.page = page;
             return page;
           },
+          active: function () {
+            this.grid = !this.grid
+          }
         },
         watch: {
           query: function () {
@@ -106,10 +113,14 @@
 
             var result = itemsjs.search({
               query: this.query,
+              sort: this.sort,
               page: this.page,
               per_page: 12,
-              filters: this.filters
+              filters: this.filters,
+              grid: this.grid
             })
+
+            //console.log(result)
 
             return result
           }
@@ -164,7 +175,7 @@
 
         <div class="row">
 
-          
+
 
           <div class="col-md-9 order-md-2 order-sm-1 mb-4">
 
@@ -176,39 +187,66 @@
 
                 <div class="row mb-4">
 
-                  <div class="col-md-12">
+                  <div class="col-md-6">
                     {{ searchResult.pagination.total }} results found <small class="text-muted">performed in
                       {{ searchResult.timings.search }} ms, facets in
                       {{ searchResult.timings.facets }} ms</small>
                   </div>
-                  <!-- 
-              <div class="col-md-6 text-right">
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                  <label class="btn btn-primary active btn-sm">
-                    <input type="radio" name="options" id="option1" autocomplete="off" checked> Active
-                  </label>
-                  <label class="btn btn-primary btn-sm">
-                    <input type="radio" name="options" id="option2" autocomplete="off"> Radio
-                  </label>
+
+                  <div class="col-md-6">
+
+
+                    <div class="form-inline float-sm-right">
+                      <div class="btn-group btn-group-toggle" data-toggle="buttons" @click="active">
+                        <label class="btn btn-primary btn-sm" v-bind:class='{active:grid}'>
+                          <i class="fas fa-th-large"></i>
+                        </label>
+                        <label class="btn btn-primary btn-sm" v-bind:class='{active:!grid}'>
+                          <i class="fas fa-th-list"></i>
+                        </label>
+                      </div>
+                      <!-- 
+                      <div class="form-group ml-3">
+                        <select class="form-control">
+                          <option>aaa</option>
+                        </select>
+                      </div>
+                      -->
+                    </div>
+
+
                   </div>
-              </div>
-              -->
+
 
                 </div>
 
-                <template v-for="item of searchResult.data.items">
+                <div class="row" v-if="grid">
+                  <template v-for="item of searchResult.data.items">
+                    <div class="col-md-3 mb-2">
+                      <div class="px-1">
+                        <img width="100%" class="img-responsive mb-2" v-bind:src="item.thumbnail">
+                        <p><b><a :href="item.related" target="related">{{ item.label }}</b></a>
+                        </p>
+                      </div>
+                    </div>
+                  </template>
+                </div>
 
-                  
+                <template v-for="item of searchResult.data.items" v-else>
 
                   <div class="row">
                     <div class="col-md-3 mb-2">
-                      <img class="img-responsive img-thumbnail" v-bind:src="item.thumbnail">
+                      <div class="px-1">
+                        <img width="100%" class="img-responsive" v-bind:src="item.thumbnail">
+                      </div>
                     </div>
                     <div class="col-md-9">
 
-                      <h5><b><a :href="item.related" target="related">{{ item.label }}</a></b><a class="ml-2" target="manifest"
-                          :href="item.manifest"><img style="width: 30px" src="https://jpsearch.go.jp/assets/img/icon/iiif-logo.svg" /></a>
-                      </h5>
+                      <p><b><a :href="item.related" target="related">{{ item.label }}</a>
+                          <!-- <a class="ml-2"
+                          target="manifest" :href="item.manifest"><img style="width: 30px"
+                            src="https://jpsearch.go.jp/assets/img/icon/iiif-logo.svg" /></a>--></b>
+                      </p>
                       <p>
                         {{ item.description }}
                       </p>
@@ -224,7 +262,7 @@
                   </div>
 
                   <hr />
-                  
+
                 </template>
 
                 <!-- div for pagination block -->
@@ -242,33 +280,34 @@
 
           </div>
 
-        
 
-        <div class="col-md-3 order-md-1 order-sm-2">
-        
-          <!-- Card Light -->
-          <div class="card">
-        
-            <!-- Card content -->
-            <div class="card-body">
-              <div class="mb-4" v-for="facet in searchResult.data.aggregations">
-                <h5><strong>{{ facet.title }}</strong></h5>
-        
-                <ul class="browse-list list-unstyled long-list" style="margin-bottom: 0;">
-                  <li v-for="bucket in facet.buckets">
-                    <div class="checkbox block">
-                      <label>
-                        <input class="checkbox" type="checkbox" v-model="filters[facet.name]" v-bind:value="bucket.key">
-                        {{ bucket.key }} <small class="text-muted">({{ bucket.doc_count }})</small>
-                      </label>
-                    </div>
-                  </li>
-                </ul>
+
+          <div class="col-md-3 order-md-1 order-sm-2">
+
+            <!-- Card Light -->
+            <div class="card">
+
+              <!-- Card content -->
+              <div class="card-body">
+                <div class="mb-4" v-for="facet in searchResult.data.aggregations">
+                  <h5><strong>{{ facet.title }}</strong></h5>
+
+                  <ul class="browse-list list-unstyled long-list" style="margin-bottom: 0;">
+                    <li v-for="bucket in facet.buckets">
+                      <div class="checkbox block">
+                        <label>
+                          <input class="checkbox" type="checkbox" v-model="filters[facet.name]"
+                            v-bind:value="bucket.key">
+                          {{ bucket.key }} <small class="text-muted">({{ bucket.doc_count }})</small>
+                        </label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
+
           </div>
-        
-        </div>
         </div>
 
       </div>
