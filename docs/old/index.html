@@ -8,15 +8,9 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="googlebot" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
   <script type="text/javascript" src="itemsjs.js"></script>
-
   <script type="text/javascript" src="https://cdn.jsdelivr.net/vue/latest/vue.js"></script>
-
-  <!-- 
-  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script> -->
-
   <script type="text/javascript" src="https://unpkg.com/vuejs-paginate@latest"></script>
 
 
@@ -26,11 +20,6 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- Material Design Bootstrap -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.8/css/mdb.min.css" rel="stylesheet">
-
-  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-
-  <!-- <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet"> -->
-
 
 
   <!-- TODO: Missing CoffeeScript 2 -->
@@ -77,7 +66,6 @@
           })
 
           label = configuration.label ? configuration.label : "IIIF Collection Search";
-          footer = configuration.footer ? configuration.footer : "IIIF Collection Search developed by Minimal Archive Project.";
 
           // adding pagination variables
           var page = this.page || 1;
@@ -94,7 +82,6 @@
             page: page,
             per_page: per_page,
             label: label,
-            footer: footer,
             grid: grid
           }
         },
@@ -164,7 +151,7 @@
   <div id="el">
 
     <!--Navbar-->
-    <nav class="navbar navbar-expand-lg fixed-top navbar-dark primary-color">
+    <nav class="navbar navbar-expand-lg fixed-top navbar-dark unique-color-dark">
 
       <div class="container">
 
@@ -180,7 +167,7 @@
     </nav>
     <!--/.Navbar-->
 
-    <div class="py-5" style="margin-top: 50px;">
+    <div class="py-5" style="margin-top: 50px; background-color: #eee">
 
       <div class="container">
 
@@ -189,32 +176,31 @@
 
 
 
-          <div class="col-md-10 order-md-2 order-sm-1 mb-4">
+          <div class="col-md-9 order-md-2 order-sm-1 mb-4">
 
             <!-- Card Light -->
-            <div>
+            <div class="card">
 
               <!-- Card content -->
-              <div>
+              <div class="card-body">
 
                 <div class="row mb-4">
 
-                  <div class="col-md-4">
-                    {{ searchResult.pagination.total }} results found
-                    <!-- <small class="text-muted">performed in
+                  <div class="col-md-6">
+                    {{ searchResult.pagination.total }} results found <small class="text-muted">performed in
                       {{ searchResult.timings.search }} ms, facets in
-                      {{ searchResult.timings.facets }} ms</small> -->
+                      {{ searchResult.timings.facets }} ms</small>
                   </div>
 
-                  <div class="col-md-8">
+                  <div class="col-md-6">
 
 
                     <div class="form-inline float-sm-right">
                       <div class="btn-group btn-group-toggle mx-1 py-1" data-toggle="buttons" @click="active">
-                        <label class="btn btn-link" v-bind:class='{active:grid}'>
+                        <label class="btn btn-primary btn-sm" v-bind:class='{active:grid}'>
                           <i class="fas fa-th-large"></i>
                         </label>
-                        <label class="btn btn-link" v-bind:class='{active:!grid}'>
+                        <label class="btn btn-primary btn-sm" v-bind:class='{active:!grid}'>
                           <i class="fas fa-th-list"></i>
                         </label>
                       </div>
@@ -243,71 +229,51 @@
 
                 <div class="row" v-if="grid">
                   <template v-for="item of searchResult.data.items">
-
-                    <div class="col-lg-3 mb-4">
-
-                      <div class="card">
+                    <div class="col-md-3 mb-2">
+                      <div class="px-1">
                         <img width="100%" class="img-responsive mb-2" v-bind:src="item._thumbnail">
-                        <div class="card-body">
-
-                          <div class="px-1">
-
-                            <p><b><a :href="item._related" target="related">{{ item._label }}</b></a>
-                            </p>
-                          </div>
-                        </div>
-
+                        <p><b><a :href="item._related" target="related">{{ item._label }}</b></a>
+                        </p>
                       </div>
                     </div>
-
-
                   </template>
                 </div>
 
                 <template v-for="item of searchResult.data.items" v-else>
 
-                  <div class="card mb-4">
-                    <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-3 mb-2">
+                      <div class="px-1">
+                        <img width="100%" class="img-responsive" v-bind:src="item._thumbnail">
+                      </div>
+                    </div>
+                    <div class="col-md-9">
 
-                      <div class="row">
-
-
-                        <div class="col-md-2 mb-2">
-                          <div class="px-1">
-                            <img width="100%" class="img-responsive" v-bind:src="item._thumbnail">
-                          </div>
-                        </div>
-                        <div class="col-md-10">
-
-                          <p><b><a :href="item._related" target="related">{{ item._label }}</a>
-                              <!-- <a class="ml-2"
+                      <p><b><a :href="item._related" target="related">{{ item._label }}</a>
+                          <!-- <a class="ml-2"
                           target="manifest" :href="item.manifest"><img style="width: 30px"
                             src="https://jpsearch.go.jp/assets/img/icon/iiif-logo.svg" /></a>--></b>
-                          </p>
-                          <p>
-                            {{ item._description }}
-                          </p>
-                          <p>
-                            <template v-for="(array, field) in item" v-if="Array.isArray(array)">
-                              <!-- 
+                      </p>
+                      <p>
+                        {{ item._description }}
+                      </p>
+                      <p>
+                        <template v-for="(array, field) in item" v-if="Array.isArray(array)">
                           <small
                             style="display: block; float: left; background-color: #dbebf2; border-radius: 5px; padding: 1px 3px 1px 3px; margin: 2px;"
                             v-for="tag in array">{{ field }}: {{ tag }}</small>
-                            -->
-                              【{{ field }}】<span v-for="tag in array">{{ tag }}&nbsp;</span>&nbsp;&nbsp;
-                            </template>
-                          </p>
+                        </template>
+                      </p>
 
-                        </div>
-                      </div>
                     </div>
                   </div>
 
+                  <hr />
 
                 </template>
 
                 <!-- div for pagination block -->
-                <div class="mt-5">
+                <div>
                   <paginate style="justify-content: center;"
                     :page-count="Math.ceil(searchResult.pagination.total / searchResult.pagination.per_page)"
                     :click-handler="goToPage" :prev-text="'Prev'" :next-text="'Next'" :container-class="'pagination'"
@@ -323,13 +289,13 @@
 
 
 
-          <div class="col-md-2 order-md-1 order-sm-2">
+          <div class="col-md-3 order-md-1 order-sm-2">
 
             <!-- Card Light -->
-            <div>
+            <div class="card">
 
               <!-- Card content -->
-              <div>
+              <div class="card-body">
                 <div class="mb-4" v-for="facet in searchResult.data.aggregations">
                   <h5><strong>{{ facet.title }}</strong></h5>
 
@@ -351,19 +317,21 @@
           </div>
         </div>
 
-        <hr />
-
-        <footer>
-
-          <div class="containter-fluid my-5 text-center">
-            {{footer}}
-          </div>
-        </footer>
-
       </div>
     </div>
+
   </div>
 
+  <footer class="page-footer unique-color-dark">
+
+    <!--Copyright-->
+    <div class="footer-copyright text-center">
+      <div class="containter-fluid my-5">
+        IIIF Collection Search developed by Minimal Archive Project.
+      </div>
+    </div>
+    <!--/.Copyright-->
+  </footer>
 </body>
 
 </html>
