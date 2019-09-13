@@ -53,12 +53,12 @@ result["rows"] = data
 config = {
     "searchableFields": [],
     "sortings": {
-        "label_asc": {
-            "field": 'label',
+        "Title Asc": {
+            "field": '_label',
             "order": 'asc'
         },
-        "label_desc": {
-            "field": 'label',
+        "Title Desc": {
+            "field": '_label',
             "order": 'desc'
         }
     },
@@ -70,9 +70,9 @@ if "label" in collection:
 
 result["config"] = config
 
-config["searchableFields"].append("label")
-config["searchableFields"].append("description")
-config["searchableFields"].append("fulltext")
+config["searchableFields"].append("_label")
+config["searchableFields"].append("_description")
+config["searchableFields"].append("_fulltext")
 
 for i in range(len(manifests)):
 
@@ -93,17 +93,17 @@ for i in range(len(manifests)):
     fulltext = ""
 
     obj = {
-        "label": manifest["label"],
-        "manifest": manifest["@id"]
+        "_label": manifest["label"],
+        "_manifest": manifest["@id"]
     }
 
-    obj["thumbnail"] = thumbnail
+    obj["_thumbnail"] = thumbnail
 
     if "related" in manifest:
-        obj["related"] = manifest["related"]
+        obj["_related"] = manifest["related"]
 
     if "description" in manifest:
-        obj["description"] = manifest["description"]
+        obj["_description"] = manifest["description"]
 
     if "metadata" in manifest:
         for metadata in manifest["metadata"]:
@@ -141,7 +141,7 @@ for i in range(len(manifests)):
                     obj[label].append(value)
                     fulltext += " "+value
 
-    obj["fulltext"] = fulltext
+    obj["_fulltext"] = fulltext
     data.append(obj)
 
 for field in aggregations:
