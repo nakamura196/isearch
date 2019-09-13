@@ -69,7 +69,7 @@
 
           // adding pagination variables
           var page = this.page || 1;
-          var per_page = this.per_page || 12;
+          var per_page = this.per_page || 20;
           var sort = this.sort || "_score_desc";
           var grid = this.grid || true;
 
@@ -116,7 +116,7 @@
               query: this.query,
               sort: this.sort,
               page: this.page,
-              per_page: 12,
+              per_page: this.per_page,
               filters: this.filters,
               grid: this.grid
             })
@@ -206,6 +206,14 @@
                       </div>
 
                       <div class="form-group mx-1 py-1">
+                        <select v-model="per_page" class="form-control">
+                          <option value=20>20</option>
+                          <option value=50>50</option>
+                          <option value=100>100</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group mx-1 py-1">
                         <select v-model="sort" class="form-control">
                           <option value="_score_desc">Relevance</option>
                           <option v-for="(value, key) in sortings" :value="key">{{key}}</option>
@@ -223,8 +231,8 @@
                   <template v-for="item of searchResult.data.items">
                     <div class="col-md-3 mb-2">
                       <div class="px-1">
-                        <img width="100%" class="img-responsive mb-2" v-bind:src="item.thumbnail">
-                        <p><b><a :href="item.related" target="related">{{ item.label }}</b></a>
+                        <img width="100%" class="img-responsive mb-2" v-bind:src="item._thumbnail">
+                        <p><b><a :href="item._related" target="related">{{ item._label }}</b></a>
                         </p>
                       </div>
                     </div>
@@ -236,18 +244,18 @@
                   <div class="row">
                     <div class="col-md-3 mb-2">
                       <div class="px-1">
-                        <img width="100%" class="img-responsive" v-bind:src="item.thumbnail">
+                        <img width="100%" class="img-responsive" v-bind:src="item._thumbnail">
                       </div>
                     </div>
                     <div class="col-md-9">
 
-                      <p><b><a :href="item.related" target="related">{{ item.label }}</a>
+                      <p><b><a :href="item._related" target="related">{{ item._label }}</a>
                           <!-- <a class="ml-2"
                           target="manifest" :href="item.manifest"><img style="width: 30px"
                             src="https://jpsearch.go.jp/assets/img/icon/iiif-logo.svg" /></a>--></b>
                       </p>
                       <p>
-                        {{ item.description }}
+                        {{ item._description }}
                       </p>
                       <p>
                         <template v-for="(array, field) in item" v-if="Array.isArray(array)">
