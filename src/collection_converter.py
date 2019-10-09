@@ -10,6 +10,8 @@ from PIL import Image
 import glob
 import sys
 import argparse
+import urllib.parse
+import hashlib
 
 def parse_args(args=sys.argv[1:]):
     """ Get the parsed arguments specified on this script.
@@ -28,8 +30,13 @@ def parse_args(args=sys.argv[1:]):
         type=str,
         help='output file path.')
 
-    return parser.parse_args(args)
+    parser.add_argument(
+        'tmp_dir_path',
+        action='store',
+        type=str,
+        help='tmp dir path.')
 
+    return parser.parse_args(args)
 
 args = parse_args()
 
@@ -37,12 +44,10 @@ collection_uri = args.collection_uri
 
 opath = args.output_file_path
 
+tmp_dir = args.tmp_dir_path
+
 size = 10
 
-response = urllib.request.urlopen(collection_uri)
-collection = json.loads(response.read().decode('utf8'))
-
-manifests = collection["manifests"]
 result = {}
 aggregations = {}
 aggregations2 = {}
@@ -65,84 +70,130 @@ config = {
     "aggregations": aggregations2
 }
 
-if "label" in collection:
-    config["label"] = collection["label"]
-
 result["config"] = config
 
 config["searchableFields"].append("_label")
 config["searchableFields"].append("_description")
 config["searchableFields"].append("_fulltext")
 
-for i in range(len(manifests)):
 
-    manifest_uri = manifests[i]["@id"]
+def exec2collection(collection_uri):
 
-    print(str(i+1)+"/"+str(len(manifests)))
+    print(collection_uri)
 
-    response = urllib.request.urlopen(manifest_uri)
-    manifest = json.loads(response.read().decode('utf8'))
+    collection_uri = urllib.parse.quote(collection_uri, safe='/:?=')
 
-    thumbnail = None
-    if "thumbnail" in manifest:
-        if "@id" in manifest["thumbnail"]:
-            thumbnail = manifest["thumbnail"]["@id"]
+    try:
+        response = urllib.request.urlopen(collection_uri)
+    except Exception as e: ###おかしい
+        print(e)
+
+    collection = json.loads(response.read().decode('utf8'))
+
+    if "collections" in collection:
+        for c in collection["collections"]:
+            exec2collection(c["@id"])
+    else:
+        exec2manifest(collection["manifests"])
+
+
+def exec2manifest(manifests):
+    for i in range(len(manifests)):
+
+        manifest_uri = manifests[i]["@id"]
+
+        print(str(i+1)+"/"+str(len(manifests)))
+
+        id = hashlib.md5(manifest_uri.encode('utf-8')).hexdigest()
+
+        tmp_file = tmp_dir+"/"+id+".json"
+
+        if not os.path.exists(tmp_file):
+
+            response = urllib.request.urlopen(manifest_uri)
+            manifest = json.loads(response.read().decode('utf8'))
+
+            f2 = open(tmp_file, 'w')
+            json.dump(manifest, f2, ensure_ascii=False, indent=4,
+                    sort_keys=True, separators=(',', ': '))
         else:
-            thumbnail = manifest["thumbnail"]
 
-    fulltext = ""
+            try:
+                with open(tmp_file) as f:
+                    manifest = json.load(f)
+            except Exception as e:
+                print(tmp_file+"\t"+e)
+                continue
 
-    obj = {
-        "_label": manifest["label"],
-        "_manifest": manifest["@id"]
-    }
 
-    obj["_thumbnail"] = thumbnail
-
-    if "related" in manifest:
-        obj["_related"] = manifest["related"]
-
-    if "description" in manifest:
-        obj["_description"] = manifest["description"]
-
-    if "metadata" in manifest:
-        for metadata in manifest["metadata"]:
-            label = metadata["label"]
-            value = metadata["value"]
-
-            if label == "description":
-                label = "description_"
-
-            if isinstance(value, list):
-                values = value
+        thumbnail = None
+        if "thumbnail" in manifest:
+            if "@id" in manifest["thumbnail"]:
+                thumbnail = manifest["thumbnail"]["@id"]
             else:
-                values = [value]
+                thumbnail = manifest["thumbnail"]
 
-            for value in values:
+        fulltext = ""
 
-                if "http" not in value:
+        obj = {
+            "_label": manifest["label"],
+            "_manifest": manifest["@id"]
+        }
 
-                    if label not in aggregations:
-                        aggregations[label] = {
-                            "title": label,
-                            "map" : {}
-                        }
+        obj["_thumbnail"] = thumbnail
 
-                    if label not in obj:
-                        obj[label] = []
+        if "related" in manifest:
+            obj["_related"] = manifest["related"]
 
-                    map = aggregations[label]["map"]
+        if "description" in manifest:
+            obj["_description"] = manifest["description"]
 
-                    if value not in map:
-                        map[value] = 0
+        if "metadata" in manifest:
+            for metadata in manifest["metadata"]:
+                label = metadata["label"]
+                value = metadata["value"]
 
-                    map[value] = map[value] + 1
+                if label == "description":
+                    label = "description_"
 
-                    obj[label].append(value)
-                    fulltext += " "+value
+                if isinstance(value, list):
+                    values = value
+                else:
+                    values = [value]
 
-    obj["_fulltext"] = fulltext
-    data.append(obj)
+                for value in values:
+
+                    if value == None:
+                        continue
+
+                    value = str(value)
+
+                    if "http" not in value:
+
+                        if label not in aggregations:
+                            aggregations[label] = {
+                                "title": label,
+                                "map": {}
+                            }
+
+                        if label not in obj:
+                            obj[label] = []
+
+                        map = aggregations[label]["map"]
+
+                        if value not in map:
+                            map[value] = 0
+
+                        map[value] = map[value] + 1
+
+                        obj[label].append(value)
+                        fulltext += " "+value
+
+        obj["_fulltext"] = fulltext
+        data.append(obj)
+
+
+exec2collection(collection_uri)
 
 for field in aggregations:
     obj = aggregations[field]
@@ -156,5 +207,5 @@ for field in aggregations:
         }
 
 f2 = open(opath, 'w')
-json.dump(result, f2, ensure_ascii = False, indent = 4,
-            sort_keys = True, separators = (',', ': '))
+json.dump(result, f2, ensure_ascii=False, indent=4,
+          sort_keys=True, separators=(',', ': '))
