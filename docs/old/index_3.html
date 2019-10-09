@@ -36,14 +36,6 @@
   <script type="text/javascript">//<![CDATA[
 
     var url = getParam('u') ? getParam('u') : "https://nakamura196.github.io/lda/data/items.json";
-    var filters = getParam('filters') ? JSON.parse(getParam('filters')) : {};
-    var q = getParam('q') ? getParam('q') : "";
-
-    //var page = getParam('page') ? Number(getParam('page')) : 1;
-    var page = 1;
-    var per_page = getParam('per_page') ? Number(getParam('per_page')) : 20;
-    var sort = getParam('sort') ? getParam('sort') : "_score_desc";
-    var grid = getParam('grid') == "false" ? false : true;
 
     window.onload = function () {
 
@@ -77,18 +69,23 @@
         data: function () {
 
           // making it more generic
-          if (Object.keys(filters).length == 0) {
-            Object.keys(configuration.aggregations).map(function (v) {
-              filters[v] = [];
-            })
-          }
+          var filters = {};
+          Object.keys(configuration.aggregations).map(function (v) {
+            filters[v] = [];
+          })
 
           label = configuration.label ? configuration.label : "IIIF Collection Search";
           footer = configuration.footer ? configuration.footer : "IIIF Collection Search developed by Minimal Archive Project.";
 
+          // adding pagination variables
+          var page = this.page || 1;
+          var per_page = this.per_page || 20;
+          var sort = this.sort || "_score_desc";
+          var grid = this.grid || true;
+
           return {
             sortings: configuration.sortings,
-            query: q,
+            query: '',
             // initializing filters with empty arrays
             sort: sort,
             filters: filters,
@@ -100,6 +97,16 @@
           }
         },
         methods: {
+          reset: function () {
+            var filters = {};
+            Object.keys(configuration.aggregations).map(function (v) {
+              filters[v] = [];
+            })
+
+            this.filters = filters;
+            this.page = 1;
+            this.query = '';
+          },
           goToPage: function (page) {
             this.page = page;
             return page;
@@ -108,10 +115,13 @@
             this.grid = !this.grid
           }
         },
+        watch: {
+          query: function () {
+            this.page = 1;
+          }
+        },
         computed: {
           searchResult: function () {
-
-            history.replaceState('', '', '?u=' + url + '&q=' + this.query + "&filters=" + JSON.stringify(this.filters) + "&sort=" + this.sort + "&page=" + this.page + "&per_page=" + this.per_page + "&grid=" + this.grid);
 
             var result = itemsjs.search({
               query: this.query,
@@ -189,6 +199,9 @@
 
                   <div class="col-md-4">
                     {{ searchResult.pagination.total }} results found
+                    <!-- <small class="text-muted">performed in
+                      {{ searchResult.timings.search }} ms, facets in
+                      {{ searchResult.timings.facets }} ms</small> -->
                   </div>
 
                   <div class="col-md-8">
@@ -268,14 +281,18 @@
                         </div>
                         <div class="col-md-10">
 
-                          <p><b><a class="text-body" :href="item._related" target="related">{{ item._label }}</a></b>
-                          </p>
+                          <p><b><a class="text-body" :href="item._related" target="related">{{ item._label }}</a></b></p>
                           <p>
                             {{ item._description }}
                           </p>
                           <p>
                             <template v-for="(array, field) in item" v-if="Array.isArray(array)">
-                              <b>{{ field }}:</b> <span v-for="tag in array">{{ tag }}&nbsp;</span>&nbsp;&nbsp;
+                              <!-- 
+                          <small
+                            style="display: block; float: left; background-color: #dbebf2; border-radius: 5px; padding: 1px 3px 1px 3px; margin: 2px;"
+                            v-for="tag in array">{{ field }}: {{ tag }}</small>
+                            -->
+                              <b>{{ field }}</b> <span v-for="tag in array">{{ tag }}&nbsp;</span>&nbsp;&nbsp;
 
                             </template>
                           </p>
