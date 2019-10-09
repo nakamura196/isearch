@@ -25,6 +25,12 @@
   <!-- Bootstrap core CSS -->
   <link href="style.css" rel="stylesheet">
 
+  <style>
+    a {
+      text-decoration: none !important;
+    }
+  </style>
+
   <!-- TODO: Missing CoffeeScript 2 -->
 
   <script type="text/javascript">//<![CDATA[
@@ -239,17 +245,17 @@
                     <div class="col-lg-3 col-md-4 mb-4">
 
                       <div class="card">
-                        <img width="100%" class="img-responsive mb-2" v-bind:src="item._thumbnail">
+                        <a :href="item._related" target="related">
+                          <img width="100%" class="img-responsive mb-2" v-bind:src="item._thumbnail">
+                        </a>
                         <div class="card-body">
 
-                          <div class="px-1">
+                          <b><a class="text-body" :href="item._related" target="related">{{ item._label }}</a></b>
 
-                            <p><b><a class="text-body" :href="item._related" target="related">{{ item._label }}</b></a>
-                            </p>
-                          </div>
                         </div>
 
                       </div>
+
                     </div>
 
 
@@ -257,6 +263,8 @@
                 </div>
 
                 <template v-for="item of searchResult.data.items" v-else>
+
+
 
                   <div class="card mb-4">
                     <div class="card-body">
@@ -266,16 +274,14 @@
 
                         <div class="col-md-2 mb-2">
                           <div class="px-1">
-                            <img width="100%" class="img-responsive" v-bind:src="item._thumbnail">
+                            <a :href="item._related" target="related">
+                              <img width="100%" class="img-responsive" v-bind:src="item._thumbnail">
+                            </a>
                           </div>
                         </div>
                         <div class="col-md-10">
 
-                          <p><b><a class="text-body" :href="item._related" target="related">{{ item._label }}</a>
-                              <!-- <a class="ml-2"
-                          target="manifest" :href="item.manifest"><img style="width: 30px"
-                            src="https://jpsearch.go.jp/assets/img/icon/iiif-logo.svg" /></a>--></b>
-                          </p>
+                          <p><b><a class="text-body" :href="item._related" target="related">{{ item._label }}</a></b></p>
                           <p>
                             {{ item._description }}
                           </p>
@@ -286,7 +292,8 @@
                             style="display: block; float: left; background-color: #dbebf2; border-radius: 5px; padding: 1px 3px 1px 3px; margin: 2px;"
                             v-for="tag in array">{{ field }}: {{ tag }}</small>
                             -->
-                              【{{ field }}】<span v-for="tag in array">{{ tag }}&nbsp;</span>&nbsp;&nbsp;
+                              <b>{{ field }}</b> <span v-for="tag in array">{{ tag }}&nbsp;</span>&nbsp;&nbsp;
+
                             </template>
                           </p>
 
@@ -294,6 +301,8 @@
                       </div>
                     </div>
                   </div>
+
+
 
 
                 </template>
@@ -323,7 +332,7 @@
 
               <!-- Card content -->
               <div>
-                <div class="mb-4 card" v-for="facet in searchResult.data.aggregations">
+                <div class="mb-4 card" v-for="facet in searchResult.data.aggregations" v-if="facet.buckets.length > 0">
                   <div class="card-body">
                     <h5><strong>{{ facet.title }}</strong></h5>
 
