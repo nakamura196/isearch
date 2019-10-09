@@ -35,7 +35,12 @@
 
   <script type="text/javascript">//<![CDATA[
 
-    var url = getParam('u') ? getParam('u') : "https://nakamura196.github.io/lda/data/items.json";
+    var url = getParam('u') ? getParam('u') : null;
+
+    if(!url){
+      location.href = "https://github.com/nakamura196/isearch/"
+    }
+
     var filters = getParam('filters') ? JSON.parse(getParam('filters')) : {};
     var q = getParam('q') ? getParam('q') : "";
 
