@@ -14,16 +14,24 @@
 
   <script type="text/javascript" src="https://cdn.jsdelivr.net/vue/latest/vue.js"></script>
 
+  <!-- 
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script> -->
+
   <script type="text/javascript" src="https://unpkg.com/vuejs-paginate@latest"></script>
 
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
-
-  <link href="normalize.css" rel="stylesheet">
-
   <!-- Bootstrap core CSS -->
-  <link href="style.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.8/css/mdb.min.css" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+
+  <!-- <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet"> -->
+
+
 
   <!-- TODO: Missing CoffeeScript 2 -->
 
@@ -152,13 +160,13 @@
 
 </head>
 
-<body style="background: #f7f7f7;">
+<body>
   <div id="el">
 
     <!--Navbar-->
-    <nav class="navbar navbar-dark bg-dark navbar-expand-lg fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top navbar-dark primary-color">
 
-      <div class="container-fluid">
+      <div class="container">
 
         <!-- Navbar brand -->
         <span class="navbar-brand white-text mr-4">{{label}}</span>
@@ -172,16 +180,16 @@
     </nav>
     <!--/.Navbar-->
 
-    <div class="py-5" style="margin-top: 60px;">
+    <div class="py-5" style="margin-top: 50px;">
 
-      <div class="container-fluid">
+      <div class="container">
 
 
         <div class="row">
 
 
 
-          <div class="col-md-9 order-md-2 order-sm-1 mb-4">
+          <div class="col-md-10 order-md-2 order-sm-1 mb-4">
 
             <!-- Card Light -->
             <div>
@@ -203,10 +211,10 @@
 
                     <div class="form-inline float-sm-right">
                       <div class="btn-group btn-group-toggle mx-1 py-1" data-toggle="buttons" @click="active">
-                        <label class="mx-2">
+                        <label class="btn btn-link" v-bind:class='{active:grid}'>
                           <i class="fas fa-th-large"></i>
                         </label>
-                        <label class="mx-2">
+                        <label class="btn btn-link" v-bind:class='{active:!grid}'>
                           <i class="fas fa-th-list"></i>
                         </label>
                       </div>
@@ -236,7 +244,7 @@
                 <div class="row" v-if="grid">
                   <template v-for="item of searchResult.data.items">
 
-                    <div class="col-lg-3 col-md-4 mb-4">
+                    <div class="col-lg-3 mb-4">
 
                       <div class="card">
                         <img width="100%" class="img-responsive mb-2" v-bind:src="item._thumbnail">
@@ -244,7 +252,7 @@
 
                           <div class="px-1">
 
-                            <p><b><a class="text-body" :href="item._related" target="related">{{ item._label }}</b></a>
+                            <p><b><a :href="item._related" target="related">{{ item._label }}</b></a>
                             </p>
                           </div>
                         </div>
@@ -271,7 +279,7 @@
                         </div>
                         <div class="col-md-10">
 
-                          <p><b><a class="text-body" :href="item._related" target="related">{{ item._label }}</a>
+                          <p><b><a :href="item._related" target="related">{{ item._label }}</a>
                               <!-- <a class="ml-2"
                           target="manifest" :href="item.manifest"><img style="width: 30px"
                             src="https://jpsearch.go.jp/assets/img/icon/iiif-logo.svg" /></a>--></b>
@@ -302,10 +310,9 @@
                 <div class="mt-5">
                   <paginate style="justify-content: center;"
                     :page-count="Math.ceil(searchResult.pagination.total / searchResult.pagination.per_page)"
-                    :click-handler="goToPage" :prev-text="'&laquo;'" :next-text="'&raquo;'"
-                    :container-class="'pagination'" :page-class="'page-item'" :page-link-class="'page-link'"
-                    :prev-class="'page-item'" :prev-link-class="'page-link'" :next-class="'page-item'"
-                    :next-link-class="'page-link'">
+                    :click-handler="goToPage" :prev-text="'Prev'" :next-text="'Next'" :container-class="'pagination'"
+                    :page-class="'page-item'" :page-link-class="'page-link'" :prev-class="'page-item'"
+                    :prev-link-class="'page-link'" :next-class="'page-item'" :next-link-class="'page-link'">
                   </paginate>
                 </div>
 
@@ -316,29 +323,27 @@
 
 
 
-          <div class="col-md-3 order-md-1 order-sm-2">
+          <div class="col-md-2 order-md-1 order-sm-2">
 
             <!-- Card Light -->
             <div>
 
               <!-- Card content -->
               <div>
-                <div class="mb-4 card" v-for="facet in searchResult.data.aggregations">
-                  <div class="card-body">
-                    <h5><strong>{{ facet.title }}</strong></h5>
+                <div class="mb-4" v-for="facet in searchResult.data.aggregations">
+                  <h5><strong>{{ facet.title }}</strong></h5>
 
-                    <ul class="browse-list list-unstyled long-list" style="margin-bottom: 0;">
-                      <li v-for="bucket in facet.buckets">
-                        <div class="checkbox block">
-                          <label>
-                            <input class="checkbox" type="checkbox" v-model="filters[facet.name]"
-                              v-bind:value="bucket.key">
-                            {{ bucket.key }} <small class="text-muted">({{ bucket.doc_count }})</small>
-                          </label>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
+                  <ul class="browse-list list-unstyled long-list" style="margin-bottom: 0;">
+                    <li v-for="bucket in facet.buckets">
+                      <div class="checkbox block">
+                        <label>
+                          <input class="checkbox" type="checkbox" v-model="filters[facet.name]"
+                            v-bind:value="bucket.key">
+                          {{ bucket.key }} <small class="text-muted">({{ bucket.doc_count }})</small>
+                        </label>
+                      </div>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
