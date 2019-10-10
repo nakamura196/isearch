@@ -49,6 +49,7 @@
     var per_page = getParam('per_page') ? Number(getParam('per_page')) : 20;
     var sort = getParam('sort') ? getParam('sort') : "_score_desc";
     var grid = getParam('grid') == "false" ? false : true;
+    var col = getParam('col') ? getParam('col') : 6;
 
     window.onload = function () {
 
@@ -101,7 +102,8 @@
             per_page: per_page,
             label: label,
             footer: footer,
-            grid: grid
+            grid: grid,
+            col: col
           }
         },
         methods: {
@@ -124,7 +126,8 @@
               page: this.page,
               per_page: this.per_page,
               filters: this.filters,
-              grid: this.grid
+              grid: this.grid,
+              col: this.col
             })
 
             return result
@@ -200,6 +203,18 @@
 
 
                     <div class="form-inline float-sm-right">
+
+                      <div class="form-group mx-1 py-1" v-if="grid">
+                          Per row:&nbsp;
+                          <select v-model="col" class="form-control">
+                            <option value=12>12</option>
+                            <option value=6>6</option>
+                            <option value=4>4</option>
+                            <option value=2>2</option>
+                          </select>
+                        </div>
+
+
                       <div class="btn-group btn-group-toggle mx-1 py-1" data-toggle="buttons" @click="active">
                         <label class="mx-2">
                           <i class="fas fa-th-large"></i>
@@ -209,7 +224,10 @@
                         </label>
                       </div>
 
+                      
+
                       <div class="form-group mx-1 py-1">
+                        Per page:&nbsp;
                         <select v-model="per_page" class="form-control">
                           <option value=20>20</option>
                           <option value=50>50</option>
@@ -234,7 +252,7 @@
                 <div class="row" v-if="grid">
                   <template v-for="item of searchResult.data.items">
 
-                    <div class="col-lg-3 col-md-4 mb-4">
+                    <div class="col-md-4 mb-4" v-bind:class="'col-lg-'+(12/col)">
 
                       <div class="card">
                         <a :href="item._related" target="related">
