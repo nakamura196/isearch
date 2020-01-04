@@ -46,7 +46,19 @@
                 </v-col>
 
                 <v-col>
-                  <v-select :items="['List', 'Grid']" v-model="layout" label="Layout"></v-select>
+                  <span class="mr-2">Layout</span>
+
+                  <v-btn-toggle
+                    v-model="layout"
+                    mandatory
+                  >
+                    <v-btn>
+                      <i class='fas fa-th-large'></i>
+                    </v-btn>
+                    <v-btn>
+                      <i class='fas fa-th-list'></i>
+                    </v-btn>
+                  </v-btn-toggle>
                 </v-col>
               </v-row>
             </v-col>
@@ -152,7 +164,7 @@
                 ></v-pagination>
               </div>
 
-              <template v-if="layout == 'Grid'">
+              <template v-if="layout == 0">
                 <v-row>
                   <v-col cols="6" sm="3" v-for="(obj, i) in results.hits.hits" :key="'result_'+i">
                     <v-card>
@@ -173,12 +185,12 @@
                 <v-card class="my-5" v-for="(obj, i) in results.hits.hits" :key="'result_'+i">
                   <v-card-text>
                     <v-row>
-                      <v-col cols="12" sm="4">
+                      <v-col cols="12" sm="3">
                         <a target="_blank" :href="obj._related[0]">
                           <v-img :src="obj._thumbnail[0]" class="grey lighten-2"></v-img>
                         </a>
                       </v-col>
-                      <v-col cols="12" sm="8">
+                      <v-col cols="12" sm="9">
                         <a :href="obj._related[0]" target="_blank">
                           <b>{{obj.Title[0]}}</b>
                         </a>
@@ -235,7 +247,7 @@ export default {
     query: {
       query: {},
       aggs: {},
-      size: 20,
+      size: 50,
       from: 0,
       page: 1,
       sort: "Title Asc"
@@ -250,7 +262,7 @@ export default {
 
     facets: {}, // ****,
 
-    layout: "List"
+    layout: 0
   }),
   created() {
     // ------------
@@ -405,7 +417,7 @@ export default {
       }
 
       if (param.layout) {
-        this.layout = param.layout;
+        this.layout = Number(param.layout);
       }
 
       if (param.sort) {
@@ -749,7 +761,7 @@ export default {
     },
     init_param() {
       this.query.query = {};
-      this.query.size = 20;
+      this.query.size = 50;
       this.query.from = 0;
       this.query.page = 1;
       this.query.sort = "Title Asc";
