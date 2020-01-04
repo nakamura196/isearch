@@ -1,13 +1,5 @@
-# Search Interface for IIIF Collection and Curation
+# Hieratische Palaographie DB
 
-This provides a search interface for IIIF Collection (Conversion needed) and IIIF Curation.
+https://nakamura196.github.io/isearch/?u=https://moeller.jinsha.tsukuba.ac.jp/data/items.json
 
-## Example
-
-### IIIF Discovery for Japanese Cultural Resources
-* Site: https://github.com/nakamura196/iiif_jpr/
-* Demo: https://nakamura196.github.io/isearch/?u=https://nakamura196.github.io/iiif_jpr/items.json
-
-### 谷根千デジタルアーカイブ
-* Site: https://nakamura196.github.io/gas-iiif
-* Demo: https://nakamura196.github.io/isearch/?u=https://script.google.com/macros/s/AKfycbyoEjiZIrq4HQbXvm8k3I-M-JQrRJZ6YGjXn0sQmSum3tkwnvI/exec?id=1qW3V6GCLxr4238_mJ8mVGOkvQsdzvHiYb_RdcrkiJ4Y_items
+https://moeller.jinsha.tsukuba.ac.jp/app/#/detail?curation=https://moeller.jinsha.tsukuba.ac.jp/data/curation/002.json
