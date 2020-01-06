@@ -268,8 +268,6 @@ export default {
 
     let param = this.$route.query;
 
-    console.log(param);
-
     if (!param.u) {
       return;
     }
@@ -302,7 +300,7 @@ export default {
         if(manifest.related){
           related = manifest.related
         } else {
-          related = "http://codh.rois.ac.jp/software/iiif-curation-viewer/demo/?manifest=" + manifest["@id"]
+          related = "http://codh.rois.ac.jp/software/iiif-curation-viewer/demo/?manifest=" + encodeURIComponent(manifest["@id"])
           //related = "https://www.kanzaki.com/works/2016/pub/image-annotator?u=" + manifest["@id"]
         }
         obj._related = [related]
@@ -440,9 +438,14 @@ export default {
   },
   methods: {
     search(reindexing_flg) {
-      window.scrollTo(0, 0);
+      window.scrollTo(0, 0);      
 
       if (reindexing_flg) {
+
+        //先頭ページに戻る
+        this.query.from = 0;
+        this.query.page = 1;
+
         let query = this.createQuery();
         this.query = query;
 
@@ -797,11 +800,6 @@ export default {
     },
     reset() {
       this.init_param();
-      this.search(true);
-    },
-    facet_search_move(type, field, value) {
-      this.init_param();
-      this[type][field] = value;
       this.search(true);
     },
     facet_filter() {
