@@ -1,5 +1,7 @@
 git pull
+cd app
 npm run build
-git add ../.
+cd ../
+git add .
 git commit -a -m "update"
 git push origin master
