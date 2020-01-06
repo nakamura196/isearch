@@ -117,8 +117,7 @@
                   class="my-5"
                   :key="'agg_'+index"
                   outlined
-                  v-if="index != 'Full text search'　&& obj.buckets.length > 0"
-                >
+                  v-if="index != 'Full text search' && obj.buckets.length > 0">
                   <v-list subheader two-line flat>
                     <v-subheader>{{index}}</v-subheader>
 
@@ -126,7 +125,7 @@
                       <v-list-item-group multiple>
                         <template v-for="(bucket, index2) in obj.buckets">
                           <v-list-item :key="'bucket_'+index2" v-if="bucket.key != ''">
-                            <template v-slot:default="{ active, toggle }">
+                            <template>
                               <v-list-item-action>
                                 <v-checkbox v-model="bucket.value" color="primary"></v-checkbox>
                               </v-list-item-action>
@@ -295,10 +294,18 @@ export default {
 
         let obj = {
           _thumbnail: [manifest.thumbnail],
-          _related: [manifest.related],
           _id: [manifest["@id"]],
           Title: [manifest.label]
         };
+
+        let related;
+        if(manifest.related){
+          related = manifest.related
+        } else {
+          related = "http://codh.rois.ac.jp/software/iiif-curation-viewer/demo/?manifest=" + manifest["@id"]
+          //related = "https://www.kanzaki.com/works/2016/pub/image-annotator?u=" + manifest["@id"]
+        }
+        obj._related = [related]
 
         if (manifest.description) {
           obj.Description = [manifest.description];
