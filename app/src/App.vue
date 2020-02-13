@@ -9,7 +9,7 @@
           <v-card-text>
             <v-text-field
               v-on:keyup.enter="search_move"
-              v-model="advanced_search['Full text search']"
+              v-model="advancedSearch['Full text search']"
               label="Full text search"
             ></v-text-field>
 
@@ -29,7 +29,7 @@
               <v-row>
                 <v-col>
                   <v-select
-                    :items="computed_items_sort"
+                    :items="computed_itemsSort"
                     v-model="query.sort"
                     label="Sort by"
                     @change="sort_move"
@@ -68,13 +68,13 @@
             <v-card-text>
               <span class="mr-2">Filtered by</span>
 
-              <span :key="'a_'+key" v-for="(value, key) in advanced_search_display">
+              <span :key="'a_'+key" v-for="(value, key) in advancedSearchDisplay">
                 <!-- display重要 -->
                 <v-btn
                   color="primary"
                   small
                   class="mx-1 my-1"
-                  @click="advanced_search[key] = ''; search(true)"
+                  @click="advancedSearch[key] = ''; search(true)"
                   v-if="value != [] && value != ''"
                 >
                   [Advanced] {{key.replace(".keyword", "")}}:
@@ -86,12 +86,12 @@
                 </v-btn>
               </span>
 
-              <span :key="'f_'+key" v-for="(value, key) in facet_search">
+              <span :key="'f_'+key" v-for="(value, key) in facetSearch">
                 <v-btn
                   color="primary"
                   small
                   class="mx-1 my-1"
-                  @click="facet_search[key] = ''; search(true)"
+                  @click="facetSearch[key] = ''; search(true)"
                   v-if="value != [] && value != ''"
                 >
                   [Facet] {{key.replace(".keyword", "")}}:
@@ -168,7 +168,7 @@
                   <v-col cols="6" sm="3" v-for="(obj, i) in results.hits.hits" :key="'result_'+i">
                     <v-card>
                       <a target="_blank" :href="obj._related[0]">
-                        <v-img :src="obj._thumbnail[0]" class="grey lighten-2"></v-img>
+                        <v-img :src="obj._thumbnail[0]" contain style="max-height : 200px;" class="grey lighten-2"></v-img>
                       </a>
                       <v-card-text>
                         <a :href="obj._related[0]" target="_blank">
@@ -186,7 +186,7 @@
                     <v-row>
                       <v-col cols="12" sm="3">
                         <a target="_blank" :href="obj._related[0]">
-                          <v-img :src="obj._thumbnail[0]" class="grey lighten-2"></v-img>
+                          <v-img :src="obj._thumbnail[0]" contain style="max-height : 200px;" class="grey lighten-2"></v-img>
                         </a>
                       </v-col>
                       <v-col cols="12" sm="9">
@@ -233,7 +233,7 @@
 </template>
 
 <script>
-let facet_size = 50;
+let facetSize = 50;
 
 import axios from "axios";
 export default {
@@ -241,7 +241,7 @@ export default {
     config: {
       u: "",
       header: "",
-      items_sort: {}
+      itemsSort: {}
     },
     query: {
       query: {},
@@ -251,12 +251,12 @@ export default {
       page: 1,
       sort: "Title Asc"
     },
-    advanced_search: {},
-    advanced_search_display: {},
-    facet_search: {},
+    advancedSearch: {},
+    advancedSearchDisplay: {},
+    facetSearch: {},
     index: {}, //インデックス
-    data_all: [], //検索結果全数
-    data_filtered: [], //検索結果数
+    dataAll: [], //検索結果全数
+    dataFiltered: [], //検索結果数
     results: [], //ページで分けた数
 
     facets: {}, // ****,
@@ -277,7 +277,7 @@ export default {
     axios.get(param.u).then(response => {
       let collection = response.data;
 
-      this.config.header = collection.label;
+      this.config.header = collection.label ? collection.label : "IIIF Collection Search";
 
       let results = [];
 
@@ -370,23 +370,23 @@ export default {
 
       let op = [];
 
-      let items_sort = {};
+      let itemsSort = {};
 
       for (let key in index) {
         if (key.indexOf("_") != -1) {
           continue;
         }
 
-        items_sort[key + " Asc"] = {
+        itemsSort[key + " Asc"] = {
           value: key,
           type: "asc"
         };
-        items_sort[key + " Desc"] = {
+        itemsSort[key + " Desc"] = {
           value: key,
           type: "desc"
         };
 
-        this.facet_search[key] = [];
+        this.facetSearch[key] = [];
 
         op.push({
           label: key,
@@ -394,9 +394,9 @@ export default {
         });
       }
 
-      this.config.items_sort = items_sort;
+      this.config.itemsSort = itemsSort;
 
-      this.data_all = results;
+      this.dataAll = results;
 
       let aggs = {};
       for (let i = 0; i < op.length; i++) {
@@ -407,18 +407,18 @@ export default {
             order: {
               _count: "desc"
             },
-            size: facet_size
+            size: facetSize
           }
         };
       }
       this.query.aggs = aggs;
 
       if (param.advanced) {
-        this.advanced_search = JSON.parse(param.advanced);
+        this.advancedSearch = JSON.parse(param.advanced);
       }
 
       if (param.facet) {
-        this.facet_search = JSON.parse(param.facet);
+        this.facetSearch = JSON.parse(param.facet);
       }
 
       if (param.layout) {
@@ -451,17 +451,17 @@ export default {
 
         let indexes = this.filter(this.query);
 
-        let data_filtered = this.getDataFiltered(indexes);
-        this.data_filtered = data_filtered;
+        let dataFiltered = this.getDataFiltered(indexes);
+        this.dataFiltered = dataFiltered;
 
         let facets = this.createFacets(indexes, this.query.aggs);
         this.facets = facets;
       }
 
-      this.data_filtered = this.sort_data(this.data_filtered, this.query.sort);
+      this.dataFiltered = this.sort_data(this.dataFiltered, this.query.sort);
 
       let results = this.getResult(
-        this.data_filtered,
+        this.dataFiltered,
         (this.query.page - 1) * this.query.size,
         this.query.size
       );
@@ -472,13 +472,13 @@ export default {
           hits: results,
           total: {
             relation: this.query.sort,
-            value: this.data_filtered.length
+            value: this.dataFiltered.length
           }
         }
       };
 
-      for (let key in this.advanced_search) {
-        this.advanced_search_display[key] = this.advanced_search[key];
+      for (let key in this.advancedSearch) {
+        this.advancedSearchDisplay[key] = this.advancedSearch[key];
       }
       this.update_param();
 
@@ -493,15 +493,15 @@ export default {
         must: must_query
       };
 
-      for (let key in this.advanced_search) {
-        let value_advanced = this.advanced_search[key];
+      for (let key in this.advancedSearch) {
+        let value_advanced = this.advancedSearch[key];
         if (value_advanced != "") {
           filter_query.push(this.createMustQuery(key, [value_advanced], false));
         }
       }
 
-      for (let key in this.facet_search) {
-        let value_facet = this.facet_search[key];
+      for (let key in this.facetSearch) {
+        let value_facet = this.facetSearch[key];
         if (value_facet.length != 0) {
           filter_query.push(this.createFilterQuery(key, value_facet));
         }
@@ -562,14 +562,14 @@ export default {
       };
     },
     getDataFiltered(indexes) {
-      let data_filtered = [];
+      let dataFiltered = [];
       for (let i = 0; i < indexes.length; i++) {
-        data_filtered.push(this.data_all[indexes[i]]);
+        dataFiltered.push(this.dataAll[indexes[i]]);
       }
-      return data_filtered;
+      return dataFiltered;
     },
-    sort_data(data_filtered, type) {
-      let obj = this.config.items_sort[type];
+    sort_data(dataFiltered, type) {
+      let obj = this.config.itemsSort[type];
 
       let asc_flg = true;
       if (obj.type == "desc") {
@@ -587,23 +587,23 @@ export default {
 
       let key = "Title";
 
-      data_filtered.sort(function(a, b) {
+      dataFiltered.sort(function(a, b) {
         if (a[field][0] > b[field][0]) return v_1;
         if (a[field][0] < b[field][0]) return v_2;
         if (a[key][0] > b[key][0]) return v_1;
         if (a[key][0] < b[key][0]) return v_2;
         return 0;
       });
-      return data_filtered;
+      return dataFiltered;
     },
     getResult(indexes, from, size) {
       let results = [];
       let to = from + size;
-      if (to > this.data_filtered.length) {
-        to = this.data_filtered.length;
+      if (to > this.dataFiltered.length) {
+        to = this.dataFiltered.length;
       }
       for (let i = from; i < to; i++) {
-        results.push(this.data_filtered[i]);
+        results.push(this.dataFiltered[i]);
       }
       return results;
     },
@@ -652,10 +652,10 @@ export default {
             doc_count: arr[i].value
           };
           //検索条件の反映
-          if (!this.facet_search[field]) {
-            this.facet_search[field] = [];
+          if (!this.facetSearch[field]) {
+            this.facetSearch[field] = [];
           }
-          if (this.facet_search[field].indexOf(key) != -1) {
+          if (this.facetSearch[field].indexOf(key) != -1) {
             bucket.value = true;
           }
           buckets.push(bucket);
@@ -672,7 +672,7 @@ export default {
       let index = this.index;
 
       let index_all = [];
-      for (let i = 0; i < this.data_all.length; i++) {
+      for (let i = 0; i < this.dataAll.length; i++) {
         index_all.push(i);
       }
 
@@ -742,14 +742,14 @@ export default {
     },
     //詳細検索ボタン
     search_move() {
-      for (let key in this.facet_search) {
-        let value = this.facet_search[key];
+      for (let key in this.facetSearch) {
+        let value = this.facetSearch[key];
         if (value instanceof Array) {
           value = [];
         } else {
           value = "";
         }
-        this.facet_search[key] = value;
+        this.facetSearch[key] = value;
       }
 
       if (this.query.page != 1) {
@@ -761,8 +761,8 @@ export default {
     update_param() {
       let param = {
         u: this.config.u,
-        advanced: JSON.stringify(this.advanced_search),
-        facet: JSON.stringify(this.facet_search),
+        advanced: JSON.stringify(this.advancedSearch),
+        facet: JSON.stringify(this.facetSearch),
         layout: this.layout,
         size: this.query.size,
         sort: this.query.sort
@@ -776,24 +776,24 @@ export default {
       this.query.page = 1;
       this.query.sort = "Title Asc";
 
-      for (let key in this.advanced_search) {
-        let value = this.advanced_search[key];
+      for (let key in this.advancedSearch) {
+        let value = this.advancedSearch[key];
         if (value instanceof Array) {
           value = [];
         } else {
           value = "";
         }
-        this.advanced_search[key] = value;
+        this.advancedSearch[key] = value;
       }
 
-      for (let key in this.facet_search) {
-        let value = this.facet_search[key];
+      for (let key in this.facetSearch) {
+        let value = this.facetSearch[key];
         if (value instanceof Array) {
           value = [];
         } else {
           value = "";
         }
-        this.facet_search[key] = value;
+        this.facetSearch[key] = value;
       }
 
       this.update_param();
@@ -804,14 +804,14 @@ export default {
     },
     facet_filter() {
       //list値の初期化
-      for (let key in this.facet_search) {
-        let value = this.facet_search[key];
+      for (let key in this.facetSearch) {
+        let value = this.facetSearch[key];
         if (value instanceof Array) {
           value = [];
         } else {
           value = "";
         }
-        this.facet_search[key] = value;
+        this.facetSearch[key] = value;
       }
 
       let aggregations = this.results.aggregations;
@@ -820,10 +820,10 @@ export default {
         for (let i = 0; i < buckets.length; i++) {
           let bucket = buckets[i];
           if (bucket.value) {
-            if (!this.facet_search[field]) {
-              this.facet_search[field] = [];
+            if (!this.facetSearch[field]) {
+              this.facetSearch[field] = [];
             }
-            this.facet_search[field].push(bucket.key);
+            this.facetSearch[field].push(bucket.key);
           }
         }
       }
@@ -847,9 +847,9 @@ export default {
     pagination_length: function() {
       return Math.ceil(this.total / this.query.size);
     },
-    computed_items_sort: function() {
+    computed_itemsSort: function() {
       let arr = [];
-      for (let key in this.config.items_sort) {
+      for (let key in this.config.itemsSort) {
         arr.push(key);
       }
       return arr;
