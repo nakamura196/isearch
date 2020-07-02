@@ -14,5 +14,5 @@ Demo: https://nakamura196.github.io/isearch/app/#/?u=https://script.google.com/m
 
 Site: https://www.imes.boj.or.jp/archives/digital_archive/digital_archive.html
 
-Demo: https://nakamura196.github.io/isearch/app/#/?u=https://api.myjson.com/bins/1fnggs
+Demo: https://nakamura196.github.io/isearch/app/#/?u=https%3A%2F%2Fscript.google.com%2Fmacros%2Fs%2FAKfycbyoEjiZIrq4HQbXvm8k3I-M-JQrRJZ6YGjXn0sQmSum3tkwnvI%2Fexec%3Fid%3D1lFWBbitwBYUEOSeIUQ5ashhQN71WQFgXqOCPhqKWP4U
 
